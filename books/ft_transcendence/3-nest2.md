@@ -4,8 +4,12 @@ free: false
 ---
 
 # 0. プロジェクト作成
+- Nest CLIをインストールする
 ```shell
 npm i -g @nestjs/cli
+```
+- 新規プロジェクトを作成する
+```shell
 nest new server 
 ```
 - 作成されるフォルダ構成
