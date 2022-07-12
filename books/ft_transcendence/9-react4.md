@@ -13,7 +13,7 @@ free: false
 
 ## Propsとは
 
-- **コンポーネントに対して渡す**引数のようなもの [コンポーネントってなんだっけ？>>>](https://github.com/mfunyu/pre-transcendence/commit/5f45b33df859b9031589378dde7b387ba398b25d)
+- **コンポーネントに対して渡す**引数のようなもの [コンポーネントってなんだっけ？>>>](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/7-react2#react%E3%81%AE%E3%82%B3%E3%83%B3%E3%83%9D%E3%83%BC%E3%83%8D%E3%83%B3%E3%83%88)
 - コンポーネントとして切り出した要素を、動的に使い回すための機能
 
 ## まずComponentを作る
