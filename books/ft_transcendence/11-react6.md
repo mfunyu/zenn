@@ -167,4 +167,41 @@ b. 変数の配列を渡す
 - 1回目にCountUp、2回目にon/offのボタンを押している
 ![](https://storage.googleapis.com/zenn-user-upload/2f1570aaae1a-20220627.png)
 
-## 
+## `useEffect`でフラグ設定を全て反映させる
+- linter, formatterをかけました（詳しくはプロジェクトセットアップへ>>>）
+
+https://github.com/mfunyu/pre-transcendence/commit/55272bdb776b0e585924096cfc6f9743e862dda0
+
+---
+
+https://github.com/mfunyu/pre-transcendence/commit/1e7be772ed8ed662be3e56f1562cc02c9c6a6c59
+ - `useEffect`を使って、`num`に変更があった場合にのみ、3の倍数でフラグを変化させるように設定する
+ - 関心が分離され、on/offボタンが使用できるようになる
+
+```diff ts:App.tsx
+const App = () => {
+    ...
+   const onClickSwitchFlag = () => {
+     setShowFaceFlag(!showFaceFlag);
+   };
++  useEffect(() => {
+     if (num % 3 === 0 && !showFaceFlag) {
+       setShowFaceFlag(true);
+     } else if (showFaceFlag) {
+       setShowFaceFlag(false);
+     }
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, [num]);
+```
+
+- 追加で条件文を修正しました
+
+https://github.com/mfunyu/pre-transcendence/commit/45666f8692b6d2bb9881dcf4fb7fe312d7ede5e3
+```diff ts:App.tsx
+     if (num % 3 === 0 && !showFaceFlag) {
+       setShowFaceFlag(true);
+-    } else if (showFaceFlag) {
++    } else if (num % 3 !== 0 && showFaceFlag) {
+       setShowFaceFlag(false);
+     }
+```
