@@ -37,7 +37,8 @@ root.render(<App />);
 
 という処理がなされることによって、レンダリングされている。
 
-# ところで拡張子`.tsx`って何？
+# ところで拡張子`.tsx`って何？[^1]
+[^1]: [React and Typescript: Build a Portfolio Project" - Section1.5](https://mercari.udemy.com/course/react-and-typescript-build-a-portfolio-project/learn/lecture/24208864#overview)
 
 ## JSX記法
 
