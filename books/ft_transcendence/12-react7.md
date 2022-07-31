@@ -168,7 +168,7 @@ b. 変数の配列を渡す
 ![](https://storage.googleapis.com/zenn-user-upload/2f1570aaae1a-20220627.png)
 
 ## `useEffect`でフラグ設定を全て反映させる
-- linter, formatterをかけました（[詳しくはプロジェクトセットアップへ>>>](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/13-setup1)）
+- linter, formatterをかけました（[詳しくはプロジェクトセットアップへ>>>](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/14-setup1)）
 
 https://github.com/mfunyu/pre-transcendence/commit/55272bdb776b0e585924096cfc6f9743e862dda0
 
