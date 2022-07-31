@@ -35,7 +35,7 @@ Norminetteみたいなものですね！
 https://github.com/mfunyu/pre-transcendence/commit/b7a6ed02c4863b6275a94d533aa2fe9e2007976f
 
 `create-react-app`を使用してReactプロジェクトを構築した場合には、ESLintパッケージがすでにインストールされている。
-[Reactプロジェクトの作成手順振り返り>>>](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/6-react1#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90)
+[Reactプロジェクトの作成手順振り返り>>>](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/07-react2#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90)
 
 - 以下のコマンドでESLintの設定ファイルを作成する
 

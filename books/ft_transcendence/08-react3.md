@@ -15,7 +15,7 @@ https://www.udemy.com/course/react-and-typescript-build-a-portfolio-project/
 
 https://github.com/mfunyu/pre-transcendence/blob/main/pre-trans-app/public/index.html#L29-L42
 
-これが、[シングルページアプリケーション](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/5-react0#spas-(single-page-applications)-%E3%81%A8%E3%81%AF%EF%BC%9F)における、ブラウザからリクエストされる唯一のHTMLになる。
+これが、[シングルページアプリケーション](https://zenn.dev/mfunyu/books/ft_transcendence/viewer/06-react1#spas-(single-page-applications)-%E3%81%A8%E3%81%AF%EF%BC%9F)における、ブラウザからリクエストされる唯一のHTMLになる。
 このHTMLページがリクエストされた後は、React（JavaScript）がHTMLを要素を書き換えて、画面の遷移を表現していく。
 
 31行目にある
