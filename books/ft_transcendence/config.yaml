@@ -32,3 +32,4 @@ chapters:
   - "18-setup5"
   - "19-postgresql1"
   - "20-postgresql2"
+  - "websocket"
