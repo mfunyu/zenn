@@ -141,6 +141,7 @@ https://github.com/mfunyu/pre-transcendence/commit/3b612619a4df40e00d98462f7fa97
 ```
 
 ### backend
+https://github.com/mfunyu/pre-transcendence/commit/de91e96ebdb4f7adf32f9f7ba2241deae69c8a7d
 
 - Loggerを追加して、`message`を受信したときにターミナルにログを出力させる
 ![](/images/websocket/2022-08-10-00-36-50.png)
