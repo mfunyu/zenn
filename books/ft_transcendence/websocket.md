@@ -1,15 +1,15 @@
 ---
-title: "websocket"
+title: "WebSocket実装: Client to Server"
 free: false
 ---
 
 # 参考資料
 https://docs.nestjs.com/websockets/gateways
+https://qiita.com/jumokuzai/items/39f9bc0213e00e2a4de8
 
+# WebSocketの実装準備
 
-# WebSocket実装準備
-
-## frontend - パッケージインストール
+## [front] パッケージインストール
 
 ```shell
 npm install @types/socket.io-client
@@ -18,7 +18,7 @@ npm install @types/socket.io-client
 `npm install` でも `npm i` でも同じ
 :::
 
-## backend
+## [back] パッケージ・モジュールの準備
 ### パッケージインストール
 ```shell
 npm i --save @nestjs/websockets @nestjs/platform-socket.io
@@ -34,7 +34,7 @@ npm config set legacy-peer-deps true
 ```shell
 nest g module chat 
 ```
-- `gateway`追加
+- `gateway`追加 → `chat.gateway.ts`が作成される
 ```shell
 nest g gateway chat --no-spec
 ```
@@ -43,7 +43,7 @@ nest g gateway chat --no-spec
 [^214]: [[WebSocket] NestJSとReactでWebSocket通信してみた](https://qiita.com/jumokuzai/items/39f9bc0213e00e2a4de8)
 
 :::message alert
-フロントとバックエンドでポートが違うため違うURLにアクセスすることになる。
+このプロジェクトではフロントとバックエンドでポートが違うため、フロントエンドから違うURL(https://localhost:3001)にアクセスすることになる。
 よってCORS（Cross-origin resource sharing）を設定しなければならない。
 詳しくは[CORS | NestJS >>>](https://docs.nestjs.com/security/cors)を参照
 :::
@@ -58,11 +58,11 @@ nest g gateway chat --no-spec
 https://github.com/mfunyu/pre-transcendence/commit/3c019b5003db82e58c042b994feaab60e01d2507
 
 
-# WebSocket実装
+# WebSocket実装編
 :::message
 ブロックの最後に`App.tsx`のコード全体を記載している
 :::
-## frontend フィールドの追加
+## [front] フィールドの追加
 https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d5adc67e7001
 
 - まず、websocketのトリガー用としてUIにインプットフィールドとボタンを追加
@@ -76,7 +76,7 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
  };
 ```
 
-## socketを作成
+## socketを作成する
 - `socket.io-client`から`io`をインポート
 - `io(url)`でsocketインスタンスを作成する
 - `onClick`のイベントに関数を設定する
@@ -116,11 +116,11 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
 
 https://github.com/mfunyu/pre-transcendence/blob/eb8ec33ab6c586943c1cb8a748f9991864039903/pre-trans-app/src/App.tsx
 
-といっても、これでは動いているのかの確認ができないので、ログを追加して確認していく↓
+といっても、これでは通信できているかどうかわかりにくいので、ログを追加して確認していく↓
 
-## ログを追記
+# ログを追記してわかりやすくする
 
-### frontend 
+## [front] consoleに出力する
 https://github.com/mfunyu/pre-transcendence/commit/3b612619a4df40e00d98462f7fa979a1a7916d80
 - 最初にレンダリングされる時にsocketIDをログに出力する
 ![](/images/websocket/2022-08-09-23-50-03.png)
@@ -140,10 +140,10 @@ https://github.com/mfunyu/pre-transcendence/commit/3b612619a4df40e00d98462f7fa97
    }, []);
 ```
 
-### backend
+## [back] Loggerを使ってターミナルに出力する
 https://github.com/mfunyu/pre-transcendence/commit/de91e96ebdb4f7adf32f9f7ba2241deae69c8a7d
 
-- Loggerを追加して、`message`を受信したときにターミナルにログを出力させる
+- [Logger](https://docs.nestjs.com/techniques/logger)を追加して、`message`を受信したときにターミナルにログを出力させる
 ![](/images/websocket/2022-08-10-00-36-50.png)
 
 ```diff ts:chat.gateway.ts
