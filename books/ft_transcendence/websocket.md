@@ -163,3 +163,69 @@ https://github.com/mfunyu/pre-transcendence/commit/de91e96ebdb4f7adf32f9f7ba2241
 ```
 
 これでフロントエンドとバックエンドの両方で、ソケット通信に際してログが出力されるようになった
+
+# Client側で入力したメッセージをServer側に送信する
+
+## [front] 入力を反映して送信する
+https://github.com/mfunyu/pre-transcendence/commit/6e19a9581d8a5f3b6638fc249ae2f2f949ed98ae
+
+ - inputフィールドの入力を`useState`を使って反映させる
+```diff ts:App.tsx
+ ...
+ const App = () => {
+   const [num, setNum] = useState(0);
+   const [showFaceFlag, setShowFaceFlag] = useState(true);
++  const [inputText, setInputText] = useState('');
+ 
+   const onClickSubmit = useCallback(() => {
+-    socket.emit('message', 'hello');
+-  }, []);
++    console.log(inputText);
++    socket.emit('message', inputText);
++  }, [inputText]);
+
+   return (
+     <>
+       ...
+-      <input id="inputText" type="text" />
++      <input
++        id="inputText"
++        type="text"
++        value={inputText}
++        onChange={(event) => {
++          setInputText(event.target.value);
++        }}
++      />
+       <input id="sendButton" onClick={onClickSubmit} type="submit" />
+     </>
+   );
+```
+https://github.com/mfunyu/pre-transcendence/blob/cfe82487d490f6461ef5c87858465bcb01c8f559/pre-trans-app/src/App.tsx
+
+## [back] 受信したメッセージをログ出力する
+
+https://github.com/mfunyu/pre-transcendence/commit/cfe82487d490f6461ef5c87858465bcb01c8f559
+
+ - `handleMessage`の引数を変えてメッセージを受け取る
+ - ログに出力する
+```diff ts:App.tsx
+-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
++import {
++  SubscribeMessage,
++  WebSocketGateway,
++  MessageBody,
++} from '@nestjs/websockets';
+ import { Logger } from '@nestjs/common';
+ 
+ @WebSocketGateway({ cors: { origin: '*' } })
+   ...
+   @SubscribeMessage('message')
+-  handleMessage(client: any, payload: any): string {
+-    this.logger.log('message recieved');
++  handleMessage(@MessageBody() message: string): string {
++    this.logger.log(message);
+     return 'Hello world!';
+   }
+ }
+```
+https://github.com/mfunyu/pre-transcendence/blob/cfe82487d490f6461ef5c87858465bcb01c8f559/pre-trans-server/src/chat/chat.gateway.ts
