@@ -7,9 +7,12 @@ free: false
 https://docs.nestjs.com/websockets/gateways
 https://qiita.com/jumokuzai/items/39f9bc0213e00e2a4de8
 
-# WebSocketの実装準備
+# 0. WebSocketの実装準備
 
-## [front] パッケージインストール
+> **TODO：**
+> frontend・backendの両方で、WebSocketの実装に必要なパッケージをインストールし、モジュールを準備する
+
+## a. [front] パッケージインストール
 
 ```shell
 npm install @types/socket.io-client
@@ -18,7 +21,7 @@ npm install @types/socket.io-client
 `npm install` でも `npm i` でも同じ
 :::
 
-## [back] パッケージ・モジュールの準備
+## b. [back] パッケージ・モジュールの準備
 ### パッケージインストール
 ```shell
 npm i --save @nestjs/websockets @nestjs/platform-socket.io
@@ -58,11 +61,16 @@ nest g gateway chat --no-spec
 https://github.com/mfunyu/pre-transcendence/commit/3c019b5003db82e58c042b994feaab60e01d2507
 
 
-# WebSocket実装編 [Client → Server]
+# 1. WebSocket実装編 [Client → Server]
+
+> **TODO：**
+> Client(`frontend`)から、Server(`backend`)にメッセージを送信できるようにする
+
 :::message
-ブロックの最後に`App.tsx`のコード全体を記載している
+aブロックとcブロックに`App.tsx`のコード全体を記載している
 :::
-## [front] フィールドの追加
+## a. front側の用意
+### [front] フィールドの追加
 https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d5adc67e7001
 
 - まず、websocketのトリガー用としてUIにインプットフィールドとボタンを追加
@@ -76,7 +84,7 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
  };
 ```
 
-## socketを作成する
+### socketを作成する
 - `socket.io-client`から`io`をインポート
 - `io(url)`でsocketインスタンスを作成する
 - `onClick`のイベントに関数を設定する
@@ -118,9 +126,12 @@ https://github.com/mfunyu/pre-transcendence/blob/eb8ec33ab6c586943c1cb8a748f9991
 
 といっても、これでは通信できているかどうかわかりにくいので、ログを追加して確認していく↓
 
-# ログを追記してわかりやすくする
+## b. ログを追記してわかりやすくする
 
-## [front] consoleに出力する
+> **TODO：**
+> メッセージを送信できているかどうかログを使って確認する
+
+### [front] consoleに出力する
 https://github.com/mfunyu/pre-transcendence/commit/3b612619a4df40e00d98462f7fa979a1a7916d80
 - 最初にレンダリングされる時にsocketIDをログに出力する
 ![](/images/websocket/2022-08-09-23-50-03.png)
@@ -140,7 +151,7 @@ https://github.com/mfunyu/pre-transcendence/commit/3b612619a4df40e00d98462f7fa97
    }, []);
 ```
 
-## [back] Loggerを使ってターミナルに出力する
+### [back] Loggerを使ってターミナルに出力する
 https://github.com/mfunyu/pre-transcendence/commit/de91e96ebdb4f7adf32f9f7ba2241deae69c8a7d
 
 - [Logger](https://docs.nestjs.com/techniques/logger)を追加して、`message`を受信したときにターミナルにログを出力させる
@@ -164,9 +175,9 @@ https://github.com/mfunyu/pre-transcendence/commit/de91e96ebdb4f7adf32f9f7ba2241
 
 これでフロントエンドとバックエンドの両方で、ソケット通信に際してログが出力されるようになった
 
-# Client側で入力したメッセージをServer側に送信する
+## c. Client側で入力したメッセージをServer側に送信する
 
-## [front] 入力を反映して送信する
+### [front] 入力を反映して送信する
 https://github.com/mfunyu/pre-transcendence/commit/6e19a9581d8a5f3b6638fc249ae2f2f949ed98ae
 
  - inputフィールドの入力を`useState`を使って反映させる
@@ -202,7 +213,7 @@ https://github.com/mfunyu/pre-transcendence/commit/6e19a9581d8a5f3b6638fc249ae2f
 ```
 https://github.com/mfunyu/pre-transcendence/blob/cfe82487d490f6461ef5c87858465bcb01c8f559/pre-trans-app/src/App.tsx
 
-## [back] 受信したメッセージをログ出力する
+### [back] 受信したメッセージをログ出力する
 
 https://github.com/mfunyu/pre-transcendence/commit/cfe82487d490f6461ef5c87858465bcb01c8f559
 

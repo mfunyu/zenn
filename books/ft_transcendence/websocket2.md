@@ -3,9 +3,12 @@ title: "WebSocket実装: Server to Client 📥"
 free: false
 ---
 
-# WebSocket実装編 [Server → all Clients]
+# 2. WebSocket実装編 [Server → all Clients]
 
-## [back] メッセージをClientに送り返す
+> **TODO：**
+> Server(`backend`)から全てのClientに、一斉にメッセージを送信できるようにする
+
+## a. [back] メッセージをClientに送り返す
 
 https://github.com/mfunyu/pre-transcendence/commit/a0f2d66becd23ec97ce3c2489372b7c1108bce7e
 
@@ -40,7 +43,7 @@ https://github.com/mfunyu/pre-transcendence/commit/a0f2d66becd23ec97ce3c2489372b
  }
 ```
 
-## [front] Serverからのメッセージを表示する
+## b. [front] Serverからのメッセージを表示する
 
 ### Serverからの通信を受け取る
 
@@ -58,12 +61,16 @@ https://github.com/mfunyu/pre-transcendence/commit/a0f2d66becd23ec97ce3c2489372b
        <h1>Hello World!</h1>
   ...
 ```
+:::message
+確認のためなので、上記の変更はコミットしていない
+:::
 
 ### Serverから受け取ったメッセージを表示する
 https://github.com/mfunyu/pre-transcendence/commit/b393276fa1ed2e870a1c8354a2f81791bb8c6dc3
 
 ![](/images/websocket2/2022-08-14-00-06-00.png)
 
+- 前項での変更の代わりに以下を追記する
 - `chatLog`を追加して、メッセージを受信するごとにアップデートする
 - `chatLog`の中身をループで表示させる
 :::message alert
@@ -97,7 +104,7 @@ Consoleを見ると、Logが増えるとともにレンダリングの回数が�
  };
 ```
 
-### 2画面で確認する
+## c. 2画面で確認する
 
 ![](/images/websocket2/2022-08-14-00-16-58.png)
 
@@ -106,5 +113,5 @@ Consoleを見ると、Logが増えるとともにレンダリングの回数が�
 - リロードしなくてもどちらのメッセージも表示される
 
 :::message
-これで、コネクションが確立している全てのClientに同時にメッセージを返すことができるようになった
+これで、コネクションが確立している全てのClientに同時にメッセージを返すことができるようになった👏👏
 :::
