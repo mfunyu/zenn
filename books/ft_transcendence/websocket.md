@@ -58,7 +58,7 @@ nest g gateway chat --no-spec
 https://github.com/mfunyu/pre-transcendence/commit/3c019b5003db82e58c042b994feaab60e01d2507
 
 
-# WebSocket実装編
+# WebSocket実装編 [Client → Server]
 :::message
 ブロックの最後に`App.tsx`のコード全体を記載している
 :::
