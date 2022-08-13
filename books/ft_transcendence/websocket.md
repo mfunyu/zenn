@@ -1,5 +1,5 @@
 ---
-title: "WebSocket実装: Client to Server"
+title: "WebSocket実装: Client to Server 📤"
 free: false
 ---
 
