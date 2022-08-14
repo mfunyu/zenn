@@ -94,23 +94,20 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
 +import React, { useState, useEffect, useCallback } from 'react';
 +import io from 'socket.io-client';
  import StyledMessage from './components/StyledMessage';
- 
+
++  const socket = io('http://localhost:3000');
++
  const App = () => {
    const [num, setNum] = useState(0);
    const [showFaceFlag, setShowFaceFlag] = useState(true);
- 
-+  const socket = io('http://localhost:3000');
-+
-	
-	...
- 
+   ...
 +  const onClickSubmit = useCallback(() => {
 +    socket.emit('message', 'hello');
 +  }, []);
 +
    return (
      <>
-	  ...
+       ...
        </button>
        {showFaceFlag && <p> ^ ^</p>}
        <input id="inputText" type="text" />
@@ -121,6 +118,11 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
 ```
 
 完成！
+
+:::message alert
+以下のコミットでは、`const socket = io('http://localhost:3000');`がApp関数内にあり、レンダリングされるたびに新しいコネクションが作られてしまうので、上記のようにApp関数の外側に修正する必要がある。
+（10行目→5行目に修正）
+:::
 
 https://github.com/mfunyu/pre-transcendence/blob/eb8ec33ab6c586943c1cb8a748f9991864039903/pre-trans-app/src/App.tsx
 
