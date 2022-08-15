@@ -74,9 +74,10 @@ https://github.com/mfunyu/pre-transcendence/commit/b393276fa1ed2e870a1c8354a2f81
 - `chatLog`を追加して、メッセージを受信するごとにアップデートする
 - `chatLog`の中身をループで表示させる
 :::message alert
-[要改善]
-Consoleを見ると、Logが増えるとともにレンダリングの回数が増えていることがわかる
-現状ではよくわからないので放置した
+[修正点]
+Consoleを見ると、Logが増えるとともにレンダリングの回数が増えていることがわかる。
+下記コードでは修正済みだが上記のcommit時には修正されていないので要注意。
+`useEffect`の第二引数を`[chatLog]`から`[]`(空配列)に修正した。
 :::
 
 ```diff ts:App.tsx 
@@ -90,7 +91,7 @@ Consoleを見ると、Logが増えるとともにレンダリングの回数が�
 +      console.log('recieved : ', message);
 +      setChatLog([...chatLog, message]);
 +    });
-+  }, [chatLog]);
++  }, []);
 +
    return (
      <>
