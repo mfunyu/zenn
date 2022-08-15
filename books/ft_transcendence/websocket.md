@@ -46,6 +46,7 @@ nest g gateway chat --no-spec
 [^214]: [[WebSocket] NestJSとReactでWebSocket通信してみた](https://qiita.com/jumokuzai/items/39f9bc0213e00e2a4de8)
 
 :::message alert
+[注意点]
 このプロジェクトではフロントとバックエンドでポートが違うため、フロントエンドから違うURL(https://localhost:3001)にアクセスすることになる。
 よってCORS（Cross-origin resource sharing）を設定しなければならない。
 詳しくは[CORS | NestJS >>>](https://docs.nestjs.com/security/cors)を参照
@@ -120,6 +121,7 @@ https://github.com/mfunyu/pre-transcendence/commit/47103c187c0967f5d72e7b7b8100d
 完成！
 
 :::message alert
+[修正点]
 以下のコミットでは、`const socket = io('http://localhost:3000');`がApp関数内にあり、レンダリングされるたびに新しいコネクションが作られてしまうので、上記のようにApp関数の外側に修正する必要がある。
 （10行目→5行目に修正）
 :::
