@@ -71,28 +71,36 @@ https://github.com/mfunyu/pre-transcendence/commit/b393276fa1ed2e870a1c8354a2f81
 ![](/images/websocket2/2022-08-14-00-06-00.png)
 
 - 前項での変更の代わりに以下を追記する
-- `chatLog`を追加して、メッセージを受信するごとにアップデートする
+- stateの`msg`を追加して、メッセージを受信するごとにアップデートする
+- `msg`の変更を`chatLog`に追記する
 - `chatLog`の中身をループで表示させる
 :::message alert
 [修正点]
-Consoleを見ると、Logが増えるとともにレンダリングの回数が増えていることがわかる。
+上の画像のConsoleログを見ると、ログが増えるとともにレンダリングの回数が増えていることがわかる。
 下記コードでは修正済みだが上記のcommit時には修正されていないので要注意。
-`useEffect`の第二引数を`[chatLog]`から`[]`(空配列)に修正した。
+変更点は以下のコミットの通り
 :::
+
+https://github.com/mfunyu/pre-transcendence/commit/45ee262ac926a2380da54e75e959407bbe9ba0c8
 
 ```diff ts:App.tsx 
    ...
    const [inputText, setInputText] = useState('');
 +  const [chatLog, setChatLog] = useState<string[]>([]);
- 
++  const [msg, setMsg] = useState('');
+
    ...
 +  useEffect(() => {
 +    socket.on('update', (message: string) => {
 +      console.log('recieved : ', message);
-+      setChatLog([...chatLog, message]);
++      setMsg(message);
 +    });
 +  }, []);
 +
++  useEffect(() => {
++    setChatLog([...chatLog, msg]);
++  }, [msg]);
+
    return (
      <>
        ...
