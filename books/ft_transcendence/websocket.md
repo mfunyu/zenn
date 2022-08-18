@@ -62,7 +62,7 @@ nest g gateway chat --no-spec
 https://github.com/mfunyu/pre-transcendence/commit/3c019b5003db82e58c042b994feaab60e01d2507
 
 
-# 1. WebSocket実装編 [Client → Server]
+# 1. Server - Client間で通信 [Client → Server]
 
 > **TODO：**
 > Client(`frontend`)から、Server(`backend`)にメッセージを送信できるようにする

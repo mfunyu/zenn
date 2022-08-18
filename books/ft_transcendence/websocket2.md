@@ -3,7 +3,7 @@ title: "WebSocket実装: Server to Client 📥"
 free: false
 ---
 
-# 2. WebSocket実装編 [Server → all Clients]
+# 2. Server - Client間で通信 [Server → all Clients]
 
 > **TODO：**
 > Server(`backend`)から全てのClientに、一斉にメッセージを送信できるようにする
