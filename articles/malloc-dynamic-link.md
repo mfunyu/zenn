@@ -3,7 +3,7 @@ title: "【malloc自作のために】共有ライブラリ差し替えとmain()
 emoji: "💨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["malloc", "c", "dyld", "linker"]
-published: false
+published: true
 ---
 
 この記事は、**42tokyo Advent Calendar 2022**の9日目となります🎄
@@ -256,9 +256,7 @@ macOSの場合はここで[mallocの呼び出しを含むような処理](https:
 
 macOSでの一連の処理の流れに関して、この図があまりにもわかりやすかったので上記のサイトからお借りしました。先程のトレースに含まれていた`_dyld_start`関数は左下のdyldに表記されています。
 
-![](/images/malloc-dynamic-link/2022-12-08-18-38-32.png)
-
-
+![flow around main()](/images/malloc-dynamic-link/2022-12-08-18-38-32.png)
 
 # 注意すべき（めんどくさい）ポイント
 
