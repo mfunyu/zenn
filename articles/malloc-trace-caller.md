@@ -1,5 +1,5 @@
 ---
-title: "【malloc自作のために2】"
+title: "【malloc自作のために2】謎のfree呼び出しと隠されたアロケーター関数を探る"
 emoji: "📝"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["malloc", "c", "dyld"]
@@ -302,3 +302,40 @@ https://github.com/RetVal/objc-runtime/blob/master/runtime/objc-config.h#L53-L58
 - `ALLOCBUCKETS`は`malloc_zone_calloc`
 
 で定義されているようです。
+
+# `malloc_zone_malloc`を調査する
+
+これで、謎の`free`呼び出しの原因がわかりました。
+
+:::message
+`malloc`ではなく、`malloc_zone_malloc`という別の関数を呼び出してアロケートしているので、自作関数は呼び出されておらず、アロケートしていないものと思い込んでいた💡
+:::
+
+## `malloc_zone_malloc`って何者？
+
+`malloc_zone_malloc`ってなんだよ、と思ったのですが、
+
+```c:libmalloc/src/malloc.c
+void	*malloc(size_t size) {
+	void	*retval;
+	retval = malloc_zone_malloc(inline_malloc_default_zone(), size);
+	if (retval == NULL) {
+		errno = ENOMEM;
+	}
+	return retval;
+}
+```
+
+めちゃくちゃそのまま上記の[本家のmallocの実装](https://opensource.apple.com/source/libmalloc/libmalloc-53.1.1/src/malloc.c.auto.html)で呼び出されてました。
+
+エラー時に`errno`設定してるだけじゃん、、、
+
+`malloc`は`malloc_zone_malloc`のラッパー関数であると考えられそうですね。
+
+### zoneの概念
+
+https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html
+
+`malloc_zone_malloc`の、`zone`ってなんだ？と思ったのですが、`zone`はヒープと同義のようです。
+
+> The term zone is **synonymous** with the terms **heap**, pool, and arena in terms of memory allocation using the malloc routines.
