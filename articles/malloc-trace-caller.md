@@ -1,18 +1,19 @@
 ---
-title: ""
+title: "【malloc自作のために2】"
 emoji: "📝"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["malloc", "c", "dyld"]
 published: false
 ---
 
-自作mallocを作る記事、第2弾です。
+自作mallocを作る道のりの記事、第2弾です。
 
-前回の記事で、mallocを自作のものと置き換えると、macOSではmain()の前処理でも呼び出されるということがわかりました。
+前回の記事で、mallocを自作関数で置き換えることで、macOSでは`main()`の前処理でも`malloc`が呼び出されているということがわかりました。
 
 https://zenn.dev/mfunyu/articles/malloc-dynamic-link
 
-今回は、その前処理の中で、mallocしていないアドレスにおいてfreeが呼び出されていたので、何が起きているのか検証しました。
+今回は、その前処理の中で、`malloc`していないはずのアドレスにおいて`free`が呼び出されていたので、一体何が起きているのか検証しました。
+
 
 # 謎のfreeを確認する
 
@@ -51,9 +52,9 @@ malloc: size = 64
 malloc: size = 14
 ```
 
-main呼び出し前処理のうちに、`malloc`, `realloc`, `free`の関数がどれも呼び出されていることがわかりました。
+これで、main呼び出し前処理で、`malloc`, `realloc`, `free`の関数がどれも呼び出されていることがわかりました。
 
-各関数の呼び出し時引数を表示しましたが、これだけでは分かりづらいので、`malloc`と`realloc`の戻り値（アロケートされたアドレス）を`ret`として表示しました。
+各関数の呼び出し時引数を、自作printf（malloc不使用）で表示しましたが、これだけでは分かりづらいので、`malloc`と`realloc`の戻り値（アロケートされたアドレス）も、`ret`として表示させます。
 
 ```bash
 $> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out 
@@ -85,17 +86,18 @@ $> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out
 
 これを見ると、自作`malloc`, `realloc`が返すアドレスは全て`0x105000000`番台なのに、mallocしていないはずの`0x7fd1e0000000`という大きなアドレスが`free`の引数に渡されていることがわかります。
 
-自作`malloc`に対応するように`free`を実装すると、アロケートしていないはずのアドレスをfreeしようとしてエラー、または運が悪ければセグメンテーションフォルトになってしまいました。
+このせいで、自作`malloc`に対応するように`free`を実装したところ、アロケートしていないはずのアドレスを`free`しようとしたことになりエラー、または運が悪いときにはセグメンテーションフォルトになってしまいました。
 
 :::message
-何者かがmallocしてないはずのアドレスでfree呼び出してくる。
-一体何をfreeしようとしているんだsegfaultしちゃうよ🥺
+何者かが`malloc`してないはずのアドレスで`free`呼び出してくる。
+一体何を`free`しようとしているんだsegfaultしちゃうよ🥺
 :::
 
 # freeの呼び出し元を探る
 
 自作関数で置き換えたのは`malloc`と`realloc`だけということで、残された`calloc`や`valloc`が呼び出されているのかも！
-と`_malloc.h`から着想を得て、`calloc`や`valloc`も置き換えてみましたが呼び出されていませんでした。
+と`_malloc.h`から着想を得て、`calloc`や`valloc`も置き換えてみましたが、呼び出されていませんでした。
+残念。
 
 :::details ご参考までに、_malloc.h
 ```c:_malloc.h
@@ -158,7 +160,10 @@ __END_DECLS
 ```
 :::
 
-では、一体どんな関数がなんの目的で、アロケートしていないはずのアドレスでfreeを呼び出しているのか、ソースコードを見ないことには理解できない！
+では、一体どんな関数がなんの目的で、アロケートしていないはずのアドレスでfreeを呼び出しているのか。
+
+ソースコードを見ないことには理解できない！
+
 ということで、とにかく関数名を表示してみます。
 
 ## 呼び出し元の関数名を表示する
@@ -249,15 +254,18 @@ $> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out
 
 ## 各関数のソースを読む
 
-これで、freeを呼び出している関数が、`_NXHashRehashToCapacity`と`NXHashInsert`であるということがわかりました。
+これで、`free`を呼び出している関数が、`_NXHashRehashToCapacity`と`NXHashInsert`であるということがわかりました。
 
-いや、聞いたこともないよ！
+いや、聞いたこともないよ！😅
 
 ### `_NXHashRehashToCapacity`を読み解く
 
+`_NXHashRehashToCapacity`関数、ググったら見つかりました。
+どうやら[Objective-C runtime](https://developer.apple.com/documentation/objectivec/objective-c_runtime)の中で使われている関数っぽい。
+
 https://github.com/RetVal/objc-runtime/blob/master/runtime/hashtable2.mm#L291-L312
 
-どうやら、
+そして、どうやら、
 ```shell
 [free] by _NXHashRehashToCapacity       : ptr = 0x7ff535404110
 [free] by _NXHashRehashToCapacity       : ptr = 0x7ff535404100
@@ -269,11 +277,28 @@ https://github.com/RetVal/objc-runtime/blob/master/runtime/hashtable2.mm#L291-L3
 ```
 ここで呼び出されていると考えてほぼ間違いなさそうです。
 
+ここでfreeの引数に渡されている2つの変数、
+
 - `old->buckets`は、303行目`ALLOCBUCKETS(z, table->nbBuckets)`で、
 - `old`は、299行目`ALLOCTABLE(z)`で、
 
 どうやらどちらもアロケートされているようです。
 
-これらのマクロの定義を見ていきます。
+どちらもマクロなので、次にこれらの定義を見ていきます。
 
+https://github.com/RetVal/objc-runtime/blob/master/runtime/hashtable2.mm#L53-L69
 
+`ALLOCTABLE`は`!SUPPORT_ZONES`の場合には`malloc`と定義されていますが、それ以外の場合、つまり`SUPPORT_ZONES`が0でない場合には、`malloc_zone_malloc`という関数で定義されていることがわかりました。
+
+つまり、`malloc`の代わりに、`malloc_zone_malloc`という関数が呼び出されていたのではと推測できました！
+
+`SUPPORT_ZONES`の定義も見つかりました。
+
+https://github.com/RetVal/objc-runtime/blob/master/runtime/objc-config.h#L53-L58
+
+これを見ると、macOSの環境ではどうやら`SUPPORT_ZONES`は1、つまり、
+
+- `ALLOCTABLE`は`malloc_zone_malloc`
+- `ALLOCBUCKETS`は`malloc_zone_calloc`
+
+で定義されているようです。
