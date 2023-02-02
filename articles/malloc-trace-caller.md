@@ -311,22 +311,62 @@ https://github.com/RetVal/objc-runtime/blob/master/runtime/objc-config.h#L53-L58
 `malloc`ではなく、`malloc_zone_malloc`という別の関数を呼び出してアロケートしているので、自作関数は呼び出されておらず、アロケートしていないものと思い込んでいた💡
 :::
 
+が、なぜ`free`が直接呼び出されているのか？
+
+## `free`の実装
+
+`malloc_zone_malloc`を使うなら、`malloc_zone_free`という対応する関数を呼ぶ必要があるのでは？
+
+と思ったので、まず[`free`の実装](https://opensource.apple.com/source/libmalloc/libmalloc-53.1.1/src/malloc.c.auto.html#:~:text=return%20retval%3B%0A%7D%0A%0Avoid-,free(void%20*ptr)%20%7B,-malloc_zone_t%09*zone%3B%0A%09size_t)を確認しました。
+
+```c:libmalloc/src/malloc.c
+void	free(void *ptr) {
+    malloc_zone_t	*zone;
+    size_t		size;
+    if (!ptr)
+    	return;
+    zone = find_registered_zone(ptr, &size);
+    if (!zone) {
+        malloc_printf("*** error for object %p: pointer being freed was not allocated\n"
+                      "*** set a breakpoint in malloc_error_break to debug\n", ptr);
+        malloc_error_break();
+        if ((malloc_debug_flags & (SCALABLE_MALLOC_ABORT_ON_CORRUPTION|SCALABLE_MALLOC_ABORT_ON_ERROR))) {
+            _SIMPLE_STRING b = _simple_salloc();
+            if (b) {
+            	_simple_sprintf(b, "*** error for object %p: pointer being freed was not allocated\n", ptr);
+            	CRSetCrashLogMessage(_simple_string(b));
+            } else {
+            	CRSetCrashLogMessage("*** error: pointer being freed was not allocated\n");
+            }
+            abort();
+    	}
+    } else if (zone->version >= 6 && zone->free_definite_size)
+    	malloc_zone_free_definite_size(zone, ptr, size);
+    else
+    	malloc_zone_free(zone, ptr);
+}
+```
+
+`malloc_zone_free`呼び出してました。
+
+
+
 ## `malloc_zone_malloc`って何者？
 
 `malloc_zone_malloc`ってなんだよ、と思ったのですが、
 
 ```c:libmalloc/src/malloc.c
 void	*malloc(size_t size) {
-	void	*retval;
-	retval = malloc_zone_malloc(inline_malloc_default_zone(), size);
-	if (retval == NULL) {
-		errno = ENOMEM;
-	}
-	return retval;
+    void	*retval;
+    retval = malloc_zone_malloc(inline_malloc_default_zone(), size);
+    if (retval == NULL) {
+    	errno = ENOMEM;
+    }
+    return retval;
 }
 ```
 
-めちゃくちゃそのまま上記の[本家のmallocの実装](https://opensource.apple.com/source/libmalloc/libmalloc-53.1.1/src/malloc.c.auto.html)で呼び出されてました。
+めちゃくちゃそのまま上記の[本家の`malloc`の実装](https://opensource.apple.com/source/Libc/Libc-594.1.4/gen/malloc.c.auto.html#:~:text=callouts%09************/%0A%0Avoid%20*-,malloc(size_t%20size),-%7B%0A%20%20%20%20void%09*retval)で呼び出されてました。
 
 エラー時に`errno`設定してるだけじゃん、、、
 
