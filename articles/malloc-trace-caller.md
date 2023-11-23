@@ -2,8 +2,8 @@
 title: "【malloc自作のために2】謎のfree呼び出しと隠されたアロケーター関数を探る"
 emoji: "📝"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["malloc", "c", "dyld"]
-published: false
+topics: ["malloc", "c", "dyld", "macOS"]
+published: true
 ---
 
 自作mallocを作る道のりの記事、第2弾です。
@@ -24,7 +24,7 @@ https://zenn.dev/mfunyu/articles/malloc-dynamic-link
 int main() {}
 ```
 
-```bash 
+```bash
 $> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out
 malloc: size = 1536
 realloc: ptr = 0x0, size = 64
@@ -57,7 +57,7 @@ malloc: size = 14
 各関数の呼び出し時引数を、自作printf（malloc不使用）で表示しましたが、これだけでは分かりづらいので、`malloc`と`realloc`の戻り値（アロケートされたアドレス）も、`ret`として表示させます。
 
 ```bash
-$> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out 
+$> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out
 [malloc] size = 1536, ret = 0x105626004
 [realloc] ptr = 0x0, size = 64, ret = 0x1052cc004
 [malloc] size = 32, ret = 0x1052cc04c
@@ -183,7 +183,7 @@ __END_DECLS
 【大参考】
 https://qiita.com/koara-local/items/07a4f76b2d44ac719b65
 
---- 
+---
 以下のような`alloc_debug`という関数を作成しました。
 
 - 汎用性のある関数にしたい
@@ -223,7 +223,7 @@ void	alloc_debug(const char *func_name, void *ret_addr)
 
 【結果】
 ```bash
-$> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out 
+$> DYLD_INSERT_LIBRARIES=./libft_malloc.so DYLD_FORCE_FLAT_NAMESPACE=1 ./a.out
 [malloc] by _objc_init                  : size = 1536, ret = 0x10b5bd004
 [realloc] by _ZN4objc10SafeRanges3addEmm: ptr = 0x0, size = 64, ret = 0x10b263004
 [malloc] by NXCreateHashTableFromZone   : size = 32, ret = 0x10b26304c
@@ -272,7 +272,7 @@ https://github.com/RetVal/objc-runtime/blob/master/runtime/hashtable2.mm#L291-L3
 ```
 この2行のfreeは、上記のファイルの310, 311行目
 ```c
-    free (old->buckets); 
+    free (old->buckets);
     free (old);
 ```
 ここで呼び出されていると考えてほぼ間違いなさそうです。
@@ -372,6 +372,7 @@ void	*malloc(size_t size) {
 
 `malloc`は`malloc_zone_malloc`のラッパー関数であると考えられそうですね。
 
+<!---
 ### zoneの概念
 
 https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html
@@ -379,3 +380,51 @@ https://developer.apple.com/library/archive/documentation/Performance/Conceptual
 `malloc_zone_malloc`の、`zone`ってなんだ？と思ったのですが、`zone`はヒープと同義のようです。
 
 > The term zone is **synonymous** with the terms **heap**, pool, and arena in terms of memory allocation using the malloc routines.
+
+--->
+
+# アロケート外領域のfree対策には
+
+エラーを回避するためには、
+1. `malloc_zone_malloc`も自作する
+2. 自作`free`でも本家と同じように場合によって`malloc_zone_free`を呼び出す
+
+の手段がありそうです。
+
+圧倒的に自作`free`において`malloc_zone_free`を呼び出すほうが簡単そうなので、呼び出しの追加を採用します。
+macOSの場合にのみ以下のようにzoneのチェック、もし該当すれば`malloc_zone_free`を呼び出す処理を追記しました。
+
+```c:free.c
+void	free(void *ptr)
+{
+    ...
+#ifdef __APPLE__
+	malloc_zone_t	*zone;
+
+	zone = malloc_zone_from_ptr(ptr);
+	if (zone) {
+		malloc_zone_free(zone, ptr);
+		return ;
+	}
+#endif
+    ...
+}
+```
+これで、`malloc_zone_malloc`によって確保された領域は、`malloc_zone_free`を呼び出して開放できるようになりました。
+
+---
+
+今回は、malloc自作において、直面した謎のfree、mallocを置き換えたときにアロケートしていないはずのアドレスでfreeが呼ばれている問題についてまとめました。
+
+malloc関数を自作関数で置き換えても、macOSの`main()`の前処理において`malloc_zone_malloc`が呼び出されます。
+その時、`malloc_zone_malloc`関数を自作で実装していない場合は本家のzone式mallocが呼び出されます。
+
+`malloc_zone_malloc`によってアロケートされたアドレスも、本家では同じく`free`によって開放できるので、開放時にはそのまま自作の`free`関数がよびだされてしまいます。
+もちろん、自作の`malloc`のアロケート範囲ではありませんので自作の`free`ではエラーになり、「アロケートしていないはずのアドレスにおいて、何故か`free`が呼ばれている！」という状況が生み出されるというわけです。
+
+以上、malloc自作のために、第2弾でした。
+
+ここまで読んでいただき、ありがとうございました！
+
+👋
+
