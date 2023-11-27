@@ -372,17 +372,6 @@ void	*malloc(size_t size) {
 
 `malloc`は`malloc_zone_malloc`のラッパー関数であると考えられそうですね。
 
-<!---
-### zoneの概念
-
-https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html
-
-`malloc_zone_malloc`の、`zone`ってなんだ？と思ったのですが、`zone`はヒープと同義のようです。
-
-> The term zone is **synonymous** with the terms **heap**, pool, and arena in terms of memory allocation using the malloc routines.
-
---->
-
 # アロケート外領域のfree対策には
 
 エラーを回避するためには、
